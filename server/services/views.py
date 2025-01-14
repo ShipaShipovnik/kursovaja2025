@@ -21,6 +21,7 @@ class ServiceCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         # автоматически устанавливаем автора услуги как текущего пользователя
         serializer.save(author=self.request.user)
+    
 
 
 class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):

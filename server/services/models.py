@@ -17,6 +17,22 @@ class Service(models.Model):
                                  blank=True,
                                  related_name='services')
 
+    def __str__(self):
+        return f"{self.title} - {self.category_name} - {self.service_author}"
+
+    @property
+    def category_name(self):
+        return self.category.name if self.category else "No Category"
+
+    @property
+    def service_author(self):
+        if hasattr(self.author, 'profile'):
+            return self.author.profile.profile_name
+        return "No Profile"
+
+    class Meta:
+        verbose_name_plural = "Услуги"
+        verbose_name = "Услуга"
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -33,3 +49,4 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = "Категории"
+        verbose_name = "Категория"
