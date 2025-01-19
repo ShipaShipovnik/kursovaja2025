@@ -1,63 +1,55 @@
 <script setup>
-import Header from './components/Header.vue'
-</script>
-<script>
-export default {
-  data() {
-    return {
-      user: {
-        id: 1,
-        login: '',
-        password: '',
-        age: 15,
-        contacts: {
-          userVK: '',
-          userTG: '',
-          workEmail: '',
-          phone: '',
-        },
-        profileName: 'Анфиса Чехова',
-        profileDescr: 'lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem ',
-        spec: 'Иллюстраторка / Диджитал художница',
-      },
-      serviceList: [
-        {
-          id: 1,
-          author: 1,
-          title: "Рисунок по пояс",
-          descr:"Нарисую рисунок по пояс",
-          priceMin: 200,
-          priceMax: 1500,
-          photos: ["photot1", "photo2"],
-          isActive: true,
-          amount: 5,
-          workTime: '2 недели',
-          catg: '',
-        },
-        {
-          id: 2,
-          author: 1,
-          title: "Полнорост",
-          descr:"Нарисую рисунок персонажа в полный рост блабалабал ал ба лапшгтщугкпушкрипгри укгшрп угршк гпшрукгшр",
-          priceMin: 300,
-          priceMax: 350,
-          photos: ["photot1", "photo2"],
-          isActive: true,
-          amount: 1,
-          workTime: '3 недели',
-          catg: '',
-        },
-      ],
-    }
-  }
-}
+import Header from './components/Header.vue';
+// import { ref, onMounted } from 'vue';
+// import api from './api';
+
+// const user = ref({
+//   id: null,
+//   username: '',
+//   email: '',
+//   profile: {
+//     profileName: '',
+//     profileDescr: '',
+//     spec: '',
+//   },
+// })
+
+// const serviceList = ref({
+//   // 
+// })
+
+// //Регистрация
+// const loadUserProfile = async () => {
+//   try {
+//     const response = await api.getUSerProfile();
+//     const data = response.data;
+//     user.value = {
+//       id: data.id,
+//       username: data.username,
+//       email: data.email,
+//       profile: {
+//         profileName: data.profile ? data.profile.profileName : 'Новый Профиль',
+//         profileDescr: data.profile ? data.profile.profileDescr : 'Описание отсутствует',
+//         spec: data.profile ? data.profile.spec : '-',
+//       }
+//     };
+//   } catch (error) {
+//     console.error('Ошибка загрузки данных профиля пользователя', error)
+//   }
+// };
+// //Загрузка данных оп профиле
+
+
+
 </script>
 
 <template>
   <div class="wrapper">
     <Header />
+    <router-view>
+    </router-view>
 
-    <div class="profile-layout">
+    <!-- <div class="profile-layout">
       <div class="container pt-5 row mx-auto h-75">
         <div class="sidebar col-4  w-25 p-3 mx-auto shadow-lg">
           <div class="container">
@@ -102,8 +94,8 @@ export default {
                   </div>
                 </div>
               </div>
-            </div>
-            <!-- 
+            </div> -->
+    <!-- 
                         <div class="about-text">
                             <p>
                                 Lorem ipsum dolor sit, amet consectetur
@@ -136,11 +128,15 @@ export default {
                                 <a href class="primary-link">кпакупук</a>
                             </li>
                         </div> -->
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- </div>
+  </div>
+  </div>
+  </div> -->
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.wrapper {
+  font-family: Arial, sans-serif;
+}
+</style>
