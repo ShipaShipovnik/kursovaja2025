@@ -1,21 +1,30 @@
+from django.contrib.auth import authenticate, logout, login
+from django.http import JsonResponse
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, permissions
 from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import *
 
-#Список всех пользователей
+
+# Список всех пользователей
 class UsersList(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [permissions.AllowAny] #ИЗМЕНИТЬ ТОЛЬКО ДЛЯ АДМИНА!!!!
+    permission_classes = [permissions.AllowAny]  # ИЗМЕНИТЬ ТОЛЬКО ДЛЯ АДМИНА!!!!
 
-#Список всех рофилей
+
+# Список всех рофилей
 class ProfilesList(generics.ListAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.AllowAny] #ИЗМЕНИТЬ ТОЛЬКО ДЛЯ АДМИНА!!!!
+    permission_classes = [permissions.AllowAny]  # ИЗМЕНИТЬ ТОЛЬКО ДЛЯ АДМИНА!!!!
+
 
 #
 class UserRegistrationView(generics.CreateAPIView):
@@ -35,6 +44,36 @@ class UserRegistrationView(generics.CreateAPIView):
             profile_serializer.save(user=user)
 
         return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class LogInView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return JsonResponse({'detail': 'Данные не были предоставлены'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return JsonResponse({'status': 'success', 'username': user.username}, status=status.HTTP_200_OK)
+        return JsonResponse({'detail': 'Неверные учетные данные'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogOutView(APIView):
+    def post(self, request):
+        logout(request)
+        return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
+class CheckAuthView(APIView):
+    permission_classes = [IsAuthenticated]  # Только для аутентифицированных пользователей
+
+
+    def get(self, request):
+        response = JsonResponse({'status': 'success', 'username': request.user.username}, status=200)
+        response["Access-Control-Allow-Credentials"] = "true"
+        return response
 
 
 # данные пользователя

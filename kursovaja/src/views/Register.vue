@@ -18,6 +18,11 @@
                     <input class="form-control" type="password" v-model="userData.password" required />
                 </label>
                 <br />
+                <label class="form-label">
+                    Возраст:
+                    <input class="form-control" type="number" v-model="userData.age" required />
+                </label>
+                <br />
                 <button type="submit " class="btn btn-warning">Зарегистрироваться</button>
             </form>
             <p class="mt-4 text-muted">
@@ -29,7 +34,7 @@
 </template>
 
 <script>
-
+import api from '@/api';
 
 export default {
     data() {
@@ -38,6 +43,7 @@ export default {
                 username: '',
                 email: '',
                 password: '',
+                age:'',
             }
         }
     },

@@ -19,6 +19,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
         )
         return user  # Возвращаем созданный объект пользователя
 
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
 
@@ -29,3 +34,4 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_is_owner(self, obj):
         # Получаем флаг is_owner из контекста чтоб знать что профиль наш\не наш
         return self.context.get('is_owner', False)
+

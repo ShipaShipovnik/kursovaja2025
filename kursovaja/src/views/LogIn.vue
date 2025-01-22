@@ -24,6 +24,7 @@
 
 <script>
 import api from '@/api';
+import Cookies from 'js-cookie';
 
 export default {
     data() {
@@ -37,14 +38,31 @@ export default {
     methods: {
         async loginUser() {
             try {
-                const response = await api.loginUser(this.credentials);
+                const credentials = {
+                    username: this.credentials.username,
+                    password: this.credentials.password,
+                };
+                const response = await api.loginUser(credentials);
                 console.log('Успешная авторизация', response.data);
-                this.$router.push('/')
+
+                // Обновляем состояние в корневом компоненте
+                this.$root.isAuthenticated = true;
+                this.$root.username = response.data.username;
+
+                // Перенаправление на главную страницу
+                this.$router.push('/');
             } catch (error) {
-                console.error('Ошибка авторизации', error.response.data)
-                alert('Ошибка при авторизации')
+                console.error('Ошибка авторизации', error);
             }
-        }
+        },
+        async logout() {
+            try {
+                await api.logoutUser();
+                this.$router.push('/login');
+            } catch (error) {
+                console.error('Ошибка при выходе', error);
+            }
+        },
     }
 }
 </script>

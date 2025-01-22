@@ -19,18 +19,40 @@
             </ul>
 
             <div class="col-md-3 text-end">
-                <router-link to="/login" class="btn btn-outline-warning me-2">
-                    Login
-                </router-link>
-                <router-link to="/register" class="btn btn-warning">
-                    Sign-up
-                </router-link>
+                <span v-if="isAuthenticated">
+                    {{ username }}
+                    <button v-if="isAuthenticated" @click="logout" class="logout-button">Выйти</button>
+
+                </span>
+                <span v-else>
+                    <router-link to="/login" class="btn btn-outline-warning me-2">
+                        Login
+                    </router-link>
+                    <router-link to="/register" class="btn btn-warning">
+                        Sign-up
+                    </router-link>
+                </span>
             </div>
         </header>
     </div>
 </template>
 
 <script>
+export default {
+    computed: {
+        isAuthenticated() {
+            return this.$root.isAuthenticated;
+        },
+        username() {
+            return this.$root.username;
+        },
+    },
+    methods: {
+        logout() {
+            this.$root.logout();
+        },
+    },
+};
 </script>
 
 <style></style>
