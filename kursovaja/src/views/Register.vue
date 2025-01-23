@@ -43,20 +43,40 @@ export default {
                 username: '',
                 email: '',
                 password: '',
-                age:'',
+                age: '',
             }
         }
     },
     methods: {
         async registerUser() {
+            if (!this.userData.username || !this.userData.email || !this.userData.password || !this.userData.age) {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            if (this.userData.password.length < 8) {
+                alert('Пароль должен содержать не менее 8 символов.');
+                return;
+            }
+
             try {
-                const response = await api.registerUser(this.userData)
-                console.log('Регистрация', this.userData);
+                const response = await api.registerUser(this.userData);
+                console.log('Регистрация успешна:', response.data);
+
+                // Сохраняем данные пользователя в Vuex (если используется)
+                this.$store.dispatch('setUser', response.data.user);
+
                 alert('Регистрация успешна!');
-                this.$router.push('/profile'); //перенаправдление на логин
+                this.$router.push('/profile'); // Перенаправление на страницу профиля
             } catch (error) {
-                console.error('Ошибка регистрации', error.response.data);
-                alert('Ошибка');
+                console.error('Ошибка регистрации:', error.response?.data);
+
+                // Вывод сообщения об ошибке пользователю
+                if (error.response?.data?.detail) {
+                    alert(`Ошибка: ${error.response.data.detail}`);
+                } else {
+                    alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.');
+                }
             }
         },
     }

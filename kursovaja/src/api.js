@@ -2,43 +2,96 @@ import axios from 'axios'
 
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api',
-  withCredentials: true,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
   },
 })
 
-export default {
-  // Получить список всех пользователей
-  getUsers() {
-    return apiClient.get('/users/');
+// Добавляем токен в заголовки запросов
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+apiClient.interceptors.response.use(
+  (response) => response, // Успешный ответ
+  async (error) => {
+    if (error.response) {
+      // Ошибка 401 (неавторизован)
+      if (error.response.status === 401) {
+        // Попробуем обновить токен
+        const refreshToken = localStorage.getItem('refreshToken')
+        if (refreshToken) {
+          try {
+            const response = await apiClient.post('/token/refresh/', {
+              refresh: refreshToken,
+            })
+            const newAccessToken = response.data.access
+            localStorage.setItem('accessToken', newAccessToken)
+
+            // Повторяем оригинальный запрос с новым токеном
+            error.config.headers.Authorization = `Bearer ${newAccessToken}`
+            return apiClient(error.config)
+          } catch (refreshError) {
+            // Если обновление токена не удалось, перенаправляем на страницу входа
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            window.location.href = '/login'
+          }
+        } else {
+          // Если refresh-токена нет, перенаправляем на страницу входа
+          window.location.href = '/login'
+        }
+      }
+      console.error('Ошибка API:', error.response.data)
+    } else if (error.request) {
+      // Ошибка сети (запрос был отправлен, но ответ не получен)
+      console.error('Ошибка сети:', error.request)
+    } else {
+      // Другие ошибки
+      console.error('Ошибка:', error.message)
+    }
+    return Promise.reject(error)
   },
-  // Получить список всех профилей
-  getProfiles() {
-    return apiClient.get('/users/profiles/');
+)
+
+export default {
+  // токены итд
+  loginUser(credentials) {
+    return apiClient.post('/token/', credentials)
+  },
+  verifyToken(token) {
+    return apiClient.post('/token/verify/', { token })
+  },
+  refreshToken(refreshToken) {
+    return apiClient.post('/token/refresh/', { refresh: refreshToken })
   },
   // Зарегистрировать нового пользователя
   registerUser(userData) {
-    return apiClient.post('/users/register/', userData);
+    return apiClient.post('/users/register/', userData)
   },
-  // Авторизация
-  loginUser(credentials) {
-    return apiClient.post('/users/login/', credentials);
+  // Юзеры
+  getUsers() {
+    return apiClient.get('/users/')
   },
-  checkAuth() {
-    return apiClient.get('/users/check-auth/');
+  getCurrentUser() {
+    return apiClient.get('/my-user/')
   },
-  //   Профиль поьзователя
-  getUserProfile() {
-    return apiClient.get('/users/profile/');
+  // Профили
+  getProfiles() {
+    return apiClient.get('/users/profiles/')
   },
-  //   данные конкретного профиля по айди
+  getCurrentProfile() {
+    return apiClient.get('/my-profile/')
+  },
   getProfileDetail(profileId) {
-    return apiClient.get(`/users/profiles/${profileId}/`);
+    return apiClient.get(`/profile/${profileId}/`)
   },
-  //   обновление данных профиля
   updateProfile(profileId, profileData) {
-    return apiClient.put(`/users/profiles/${profileId}/`, profileData);
+    return apiClient.put(`/profile/${profileId}/`, profileData)
   },
 }

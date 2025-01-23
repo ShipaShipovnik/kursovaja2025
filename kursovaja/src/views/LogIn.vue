@@ -2,7 +2,7 @@
     <div class="main-block register-page container shadow p-5">
         <h1 class="h1 text-center">Авторизация</h1>
         <div class="login-form text-center">
-            <form @submit.prevent="loginUser" class="form">
+            <form @submit.prevent="login" class="form">
                 <label class="form-label">
                     Логин:
                     <input class="form-control" type="text" v-model="credentials.username" required />
@@ -24,7 +24,6 @@
 
 <script>
 import api from '@/api';
-import Cookies from 'js-cookie';
 
 export default {
     data() {
@@ -32,35 +31,41 @@ export default {
             credentials: {
                 username: '',
                 password: '',
-            }
+            },
+            error: null,
         }
     },
     methods: {
-        async loginUser() {
+        async login() {
+            this.error = null;
             try {
-                const credentials = {
+                // Выполняем вход
+                const response = await api.loginUser({
                     username: this.credentials.username,
                     password: this.credentials.password,
-                };
-                const response = await api.loginUser(credentials);
-                console.log('Успешная авторизация', response.data);
+                });
 
-                // Обновляем состояние в корневом компоненте
-                this.$root.isAuthenticated = true;
-                this.$root.username = response.data.username;
+                if (!response.data) {
+                    throw new Error('Ответ от сервера пуст');
+                }
 
-                // Перенаправление на главную страницу
-                this.$router.push('/');
+                const { access, refresh } = response.data;
+
+                if (!access || !refresh) {
+                    throw new Error('Токены отсутствуют в ответе');
+                }
+
+                // Сохраняем токены в хранилище
+                await this.$store.dispatch('setTokens', { access, refresh });
+
+                // Получаем данные пользователя
+                await this.$store.dispatch('fetchUser');
+
+                console.log('Успешный вход:', response.data);
+                this.$router.push('/profile');
             } catch (error) {
-                console.error('Ошибка авторизации', error);
-            }
-        },
-        async logout() {
-            try {
-                await api.logoutUser();
-                this.$router.push('/login');
-            } catch (error) {
-                console.error('Ошибка при выходе', error);
+                console.error('Ошибка входа:', error);
+                this.error = error.response?.data?.message || 'Неверный логин или пароль';
             }
         },
     }

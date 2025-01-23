@@ -1,15 +1,11 @@
-from django.contrib.auth import authenticate, logout, login
-from django.http import JsonResponse
-from rest_framework import generics, permissions, status
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import logout, authenticate, login
+from rest_framework import status, generics, permissions
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from rest_framework import generics, permissions
-from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import *
+from django.shortcuts import get_object_or_404
+from .models import CustomUser, Profile
+from .serializers import CustomUserSerializer, ProfileSerializer
 
 
 # Список всех пользователей
@@ -26,69 +22,83 @@ class ProfilesList(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]  # ИЗМЕНИТЬ ТОЛЬКО ДЛЯ АДМИНА!!!!
 
 
-#
+# Регистрация
 class UserRegistrationView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [permissions.AllowAny]  # можно всем
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         user_serializer = self.get_serializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        profile_data = request.data.get('profile', None)
-        if profile_data:
-            profile_serializer = ProfileSerializer(data=profile_data)
-            profile_serializer.is_valid(raise_exception=True)
-            profile_serializer.save(user=user)
-
-        return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+        # Возвращаем данные пользователя
+        return Response({
+            'user': user_serializer.data,
+        }, status=status.HTTP_201_CREATED)
 
 
-class LogInView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        if not username or not password:
-            return JsonResponse({'detail': 'Данные не были предоставлены'}, status=status.HTTP_400_BAD_REQUEST)
+# Вход
+# class LogInView(APIView):
+#     def post(self, request):
+#         serializer = LoginSerializer(data=request.data)
+#         if not serializer.is_valid():
+#             return Response({'detail': 'Неверные данные'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         username = serializer.validated_data['username']
+#         password = serializer.validated_data['password']
+#
+#         user = authenticate(request, username=username, password=password)
+#         if user:
+#             login(request, user)
+#             user_data = CustomUserSerializer(user).data
+#             return Response({'status': 'success', 'user': user_data}, status=status.HTTP_200_OK)
+#         return Response({'detail': 'Неверные учетные данные'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# # Выход
+# class LogOutView(APIView):
+#     def post(self, request):
+#         logout(request)
+#         request.session.flush()
+#         return Response({'status': 'success'}, status=status.HTTP_200_OK)
+#
+#
+# # Проверка аутентификации
+# class CheckAuthView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#
+#     def get(self, request):
+#         user_data = CustomUserSerializer(request.user).data
+#         return Response({'status': 'success', 'user': user_data}, status=status.HTTP_200_OK)
 
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            return JsonResponse({'status': 'success', 'username': user.username}, status=status.HTTP_200_OK)
-        return JsonResponse({'detail': 'Неверные учетные данные'}, status=status.HTTP_400_BAD_REQUEST)
+
+# Возвращает профиль текущего пользователя
+class CurrentProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        try:
+            return self.request.user.profile
+        except Profile.DoesNotExist:
+            raise NotFound("Profile not found.")
 
 
-class LogOutView(APIView):
-    def post(self, request):
-        logout(request)
-        return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
-
-
-class CheckAuthView(APIView):
-    permission_classes = [IsAuthenticated]  # Только для аутентифицированных пользователей
-
-
-    def get(self, request):
-        response = JsonResponse({'status': 'success', 'username': request.user.username}, status=200)
-        response["Access-Control-Allow-Credentials"] = "true"
-        return response
-
-
-# данные пользователя
-class UserProfileView(generics.RetrieveUpdateAPIView):
+# Возвращает текущего пользователя
+class CurrentUserView(generics.RetrieveUpdateAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return self.request.user  # Возвращает пользоваеля
+        return self.request.user
 
 
 # Получение и обновление профиля
 class ProfileDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.AllowAny]  # Разрешаем смотреть всем
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         profile_id = self.kwargs.get('profile_id')
@@ -96,7 +106,6 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
         return profile
 
     def get_serializer_context(self):
-        # Добавляем флаг is_owner в контекст
         context = super().get_serializer_context()
         profile = self.get_object()
         context['is_owner'] = self.request.user.is_authenticated and self.request.user == profile.user

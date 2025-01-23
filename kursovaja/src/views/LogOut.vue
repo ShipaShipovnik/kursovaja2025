@@ -6,22 +6,12 @@
 </template>
 
 <script>
-import api from '@/api';
 
 export default {
-    
-    methods: {
-        async logout() {
-            try {
-                await api.logoutUser();
-                this.$root.isAuthenticated = false;
-                this.$root.username = '';
-                this.$router.push('/login');
-            } catch (error) {
-                console.error('Ошибка при выходе', error);
-            }
-        },
-    }
+    logout() {
+        this.$store.dispatch('logout')
+        this.$router.push('/login') // Перенаправление на страницу входа
+    },
 }
 </script>
 

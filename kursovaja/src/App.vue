@@ -1,36 +1,22 @@
 <script>
 import AppHeader from './components/AppHeader.vue';
-import api from './api';
+
 export default {
   components: {
     AppHeader,
   },
-  data() {
-    return {
-      isAuthenticated: false,
-      username: '',
-    };
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated; // Используем геттер из Vuex
+    },
+    username() {
+      return this.$store.getters.user?.username; // Используем геттер из Vuex
+    },
   },
   created() {
-    this.checkAuth();
-  },
-  methods: {
-    async checkAuth() {
-      try {
-        const response = await api.checkAuth();
-        this.isAuthenticated = true;
-        this.username = response.data.username;
-      } catch (error) {
-        this.isAuthenticated = false;
-        this.username = '';
-      }
-    },
-
-    logout() {
-      this.isAuthenticated = false;
-      this.username = '';
-      this.$router.push('/login');
-    },
+    if (this.isAuthenticated) {
+      this.$store.dispatch('fetchUser'); // Загружаем данные пользователя при создании компонента
+    }
   },
 };
 

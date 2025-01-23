@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class CustomUser(AbstractUser):
@@ -24,3 +26,16 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"Профиль {self.profile_name}"
+
+
+# Сигнал для автоматического создания профиля при регистрации пользователя
+@receiver(post_save, sender=CustomUser)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.get_or_create(
+            user=instance,
+            defaults={
+                'profile_name': instance.username,  # имя профиля по умолчанию
+                'profile_bio': 'Расскажите о себе',  # bio по умолчанию
+            }
+        )

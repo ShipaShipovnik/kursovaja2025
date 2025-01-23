@@ -5,7 +5,7 @@ from .models import *
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'age','password']
+        fields = ['id', 'username', 'email', 'age', 'password']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -17,13 +17,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
             age=validated_data.get('age'),
             password=validated_data['password']
         )
-        return user  # Возвращаем созданный объект пользователя
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+        return user
 
 
+# Серилизатор профиля
 class ProfileSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
 
@@ -32,6 +29,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'profile_name', 'profile_bio', 'profile_spec', 'created_at', 'contacts', 'is_owner']
 
     def get_is_owner(self, obj):
-        # Получаем флаг is_owner из контекста чтоб знать что профиль наш\не наш
+        # Получаем флаг is_owner из контекста
         return self.context.get('is_owner', False)
 
+    def validate_contacts(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Contacts must be a JSON object.")
+        return value
