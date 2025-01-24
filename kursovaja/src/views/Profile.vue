@@ -5,14 +5,15 @@
                 <div class="container">
                     <img src="https://sh122-omsk-r52.gosweb.gosuslugi.ru/netcat_files/9/67/team_fpo_woman_1100x1100_4.png"
                         alt="" class="avatar mb-3 img-fluid">
-                    <h4 class="card-title mb-1">{{ user.profileName }}</h4>
-                    <p>{{ user.spec }}</p>
+                    <h4 class="card-title mb-1">{{ profile.profile_name || 'Имя пользователя' }}</h4>
+                    <p>{{ profile.profile_spec || 'Специальность' }}</p>
                     <div class="tab-btns">
                         <button href class="btn mb-2 d-block btn-warning w-100"
                             @click="setActiveTab('gallery')">Галлерея</button>
                         <button href class="btn mb-2 d-block btn-warning w-100"
                             @click="setActiveTab('services')">Услуги</button>
-                        <button href class="btn d-block btn-warning w-100" @click="setActiveTab('about')">Обо мне</button>
+                        <button href class="btn d-block btn-warning w-100" @click="setActiveTab('about')">Обо
+                            мне</button>
                     </div>
                     <div class="socials">
                         <!-- <a href=""><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor"
@@ -54,26 +55,7 @@
 
                     <div class="about-tab" v-if="activeTab === 'about'">
                         <div class="about-text">
-                            <p>
-                                Lorem ipsum dolor sit, amet consectetur
-                                adipisicing elit.
-                                Quibusdam est eius architecto quas blanditiis
-                                quasi odio
-                                praesentium aspernatur cum accusantium provident
-                                excepturi
-                                eaque, quidem ducimus similique repudiandae
-                                error incidunt iste?
-                            </p>
-                            <p>
-                                Lorem ipsum dolor sit, amet consectetur
-                                adipisicing elit.
-                                Quibusdam est eius architecto quas blanditiis
-                                quasi odio
-                                praesentium aspernatur cum accusantium provident
-                                excepturi
-                                eaque, quidem ducimus similique repudiandae
-                                error incidunt iste?
-                            </p>
+                            {{ profile.profile_bio || 'Информация о пользователе отсутствует.' }}
                         </div>
                         <div class="about-links">
                             <li class="list-group-item">
@@ -98,16 +80,16 @@ export default {
     data() {
         return {
             activeTab: 'services',
-            user: {
-                profileName: 'Ктото Ктото',
-                spec: 'Иллюстраторка / Диджитал художница',
-                contacts: {
-                    userVK: 'https://vk.com/username',
-                    userTG: 'https://t.me/username',
-                    workEmail: 'anfisa@example.com',
-                    phone: '+7 (999) 123-45-67',
-                },
-            },
+            // user: {
+            //     profileName: 'Ктото Ктото',
+            //     spec: 'Иллюстраторка / Диджитал художница',
+            //     contacts: {
+            //         userVK: 'https://vk.com/username',
+            //         userTG: 'https://t.me/username',
+            //         workEmail: 'anfisa@example.com',
+            //         phone: '+7 (999) 123-45-67',
+            //     },
+            // },
             serviceList: [
                 {
                     id: 1,
@@ -136,13 +118,20 @@ export default {
             ],
         };
     },
+    computed: {
+        profile() {
+            return this.$store.getters.profile || {}; // Получаем профиль из хранилища
+        },
+    },
     methods: {
         setActiveTab(tab) {
-            console.log(`Было ${this.activeTab}`)
             this.activeTab = tab
-            console.log(`Стало ${this.activeTab}`)
         }
-    }
+    },
+    async created() {
+        // Загружаем данные профиля при создании компонента
+        await this.$store.dispatch('fetchUser');
+    },
 }
 </script>
 
