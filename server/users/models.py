@@ -35,7 +35,9 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.get_or_create(
             user=instance,
             defaults={
-                'profile_name': instance.username,  # имя профиля по умолчанию
-                'profile_bio': 'Расскажите о себе',  # bio по умолчанию
+                'profile_name': instance.username,
+                'profile_bio': 'Расскажите о себе',
+                'profile_spec': 'Не указано',
+                'contacts': {},
             }
         )

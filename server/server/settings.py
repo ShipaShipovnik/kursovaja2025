@@ -124,8 +124,12 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+# Корневая папка проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Настройки для медиафайлов
+MEDIA_URL = '/media/'  # URL для доступа к медиафайлам
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь для сохранения медиафайлов
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:8080",
@@ -144,4 +148,23 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Время жизни access-токена
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Время жизни refresh-токена
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',  # Путь к файлу логов
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }

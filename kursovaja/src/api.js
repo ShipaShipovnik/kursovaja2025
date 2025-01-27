@@ -1,4 +1,5 @@
 import axios from 'axios'
+import store from './store';
 
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api',
@@ -10,12 +11,12 @@ const apiClient = axios.create({
 
 // Добавляем токен в заголовки запросов
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken')
+  const token = store.state.accessToken;
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
 apiClient.interceptors.response.use(
   (response) => response, // Успешный ответ
@@ -94,4 +95,18 @@ export default {
   updateProfile(profileId, profileData) {
     return apiClient.put(`/profile/${profileId}/`, profileData)
   },
+  // Категории
+  getCategories() {
+    return apiClient.get('/services/categories-list/')
+  },
+  // Усуги
+  createService(formData) {
+    return apiClient.post('/services/create/', formData)
+  },
+  getServices(){
+    return apiClient.get('/services/services-list/')
+  },
+  getMyServices(){
+    return apiClient.get('/services/my-services/')
+  }
 }

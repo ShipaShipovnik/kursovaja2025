@@ -1,29 +1,24 @@
+from tkinter import Image
+
 from rest_framework import serializers
 from .models import *
 
 
 # Услуги
 class ServiceSerializer(serializers.ModelSerializer):
-    photos = serializers.ListField(
-        child=serializers.ImageField(),
-        write_only=True,
-        validators=[MinLengthValidator(1), MaxLengthValidator(5)]
-    )
+    # photo = serializers.ImageField(
+    #     write_only=True,
+    #     required=True,
+    # )
 
     class Meta:
         model = Service
-        fields = ['id', 'title', 'descr', 'priceMax', 'photos', 'isActive', 'amount', 'workTime', 'category']
+        fields = ['id', 'title', 'descr', 'priceMin', 'priceMax', 'isActive', 'amount', 'workTime', 'category']
 
     def create(self, validated_data):
-        photos = validated_data.pop('photos')
-        service = Service.objects.create(**validated_data)
-
-        for photo in photos:
-            service.photos.append(photo)
-
-        service.create_thumbnails()
-
-        service.save()
+        # photo = validated_data.pop('photo')  # Извлекаем файл
+        service = Service.objects.create(**validated_data)  # Создаем услугу
+        # service.save_photo(photo)
         return service
 
 

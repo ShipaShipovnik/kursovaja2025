@@ -5,6 +5,7 @@ import LogIn from '@/views/LogIn.vue'
 import Search from '@/views/Search.vue'
 import FAQ from '@/views/FAQ.vue'
 import Profile from '@/views/Profile.vue'
+import AddService from '@/views/AddService.vue'
 
 const routes = [
   {
@@ -41,6 +42,12 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/add-service',
+    name: 'AddService',
+    component: AddService,
   },
 ]
 

@@ -28,14 +28,17 @@
             <div class="main-block p-3 col shadow-lg">
                 <div class="container">
                     <div class="about-tab" v-if="activeTab === 'gallery'">
-                        <h3 class="text-muted">Тут будут ваши работы :)</h3>
+                        <h3 class="text-muted">Тут будут ваши работы</h3>
                     </div>
                     <div class="services-list" v-if="activeTab === 'services'">
+                        <router-link to="/add-service">
+                            <div class="btn add-service-btn btn-warning w-100 mb-3">+ Добавить услугу</div>
+                        </router-link>
                         <div class="card mb-3 service-card" v-for="service in serviceList">
                             <div class="row g-0 p-2">
-                                <div class="col">
+                                <!-- <div class="col">
                                     <div class="service-img"><img src="" alt="фото услуги"></div>
-                                </div>
+                                </div> -->
                                 <div class="col-md-8">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ service.title }}</h5>
@@ -76,46 +79,13 @@
 </template>
 
 <script>
+import api
+ from '@/api';
 export default {
     data() {
         return {
             activeTab: 'services',
-            // user: {
-            //     profileName: 'Ктото Ктото',
-            //     spec: 'Иллюстраторка / Диджитал художница',
-            //     contacts: {
-            //         userVK: 'https://vk.com/username',
-            //         userTG: 'https://t.me/username',
-            //         workEmail: 'anfisa@example.com',
-            //         phone: '+7 (999) 123-45-67',
-            //     },
-            // },
-            serviceList: [
-                {
-                    id: 1,
-                    title: 'Рисунок по пояс',
-                    descr: 'Нарисую рисунок по пояс',
-                    priceMin: 200,
-                    priceMax: 1500,
-                    photos: ['photo1.jpg', 'photo2.jpg'],
-                    isActive: true,
-                    amount: 5,
-                    workTime: '2 недели',
-                    catg: 'Иллюстрация',
-                },
-                {
-                    id: 2,
-                    title: 'Полнорост',
-                    descr: 'Нарисую рисунок персонажа в полный рост',
-                    priceMin: 300,
-                    priceMax: 350,
-                    photos: ['photo3.jpg', 'photo4.jpg'],
-                    isActive: true,
-                    amount: 1,
-                    workTime: '3 недели',
-                    catg: 'Иллюстрация',
-                },
-            ],
+            serviceList: [],
         };
     },
     computed: {
@@ -125,12 +95,20 @@ export default {
     },
     methods: {
         setActiveTab(tab) {
-            this.activeTab = tab
-        }
+            this.activeTab = tab;
+        },
+        async fetchServices() {
+            try {
+                const response = await api.getServices();
+                this.serviceList = response.data; 
+            } catch (error) {
+                console.error('Ошибка при загрузке услуг:', error);
+            }
+        },
     },
     async created() {
-        // Загружаем данные профиля при создании компонента
         await this.$store.dispatch('fetchUser');
+        await this.fetchServices();
     },
 }
 </script>

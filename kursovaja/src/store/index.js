@@ -4,7 +4,7 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     user: null,
-    profile: null, 
+    profile: null,
     isAuthenticated: false,
     accessToken: localStorage.getItem('accessToken') || null, // Восстанавливаем токен из localStorage
     refreshToken: localStorage.getItem('refreshToken') || null,
@@ -110,7 +110,7 @@ export default createStore({
   getters: {
     isAuthenticated: (state) => state.isAuthenticated,
     user: (state) => state.user,
-    profile: (state) => state.profile, 
+    profile: (state) => state.profile,
     accessToken: (state) => state.accessToken,
     refreshToken: (state) => state.refreshToken,
   },
